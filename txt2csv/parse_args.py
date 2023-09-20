@@ -68,7 +68,8 @@ def app_arg():
     )
     ap.add_argument(
         "--headers",
-        help='Header for csv file, default: "FILENAME,ID,NAME,FIELD1,FIELD2,FIELD3,FIELD4"',
+        help='The header for the csv file. To skip the header, specify an empty string "". '
+        'Default: "FILENAME,ID,NAME,FIELD1,FIELD2,FIELD3,FIELD4"',
         default="FILENAME,ID,NAME,FIELD1,FIELD2,FIELD3,FIELD4",
     )
     ap.add_argument(
