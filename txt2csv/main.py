@@ -18,7 +18,7 @@ def get_folder_data(input_folder: Path) -> dict[str, list[str]]:
             if input_file.is_file():
                 input_file_stem = input_file.stem
                 result[input_file_stem] = []
-                with input_file.open("r", encoding="utf-8-sig") as fp:
+                with input_file.open("r", encoding="utf-8") as fp:
                     while True:
                         line = fp.readline()
                         if not line:
@@ -91,4 +91,7 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as err:
+        print(err)
