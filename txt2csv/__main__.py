@@ -85,10 +85,19 @@ def main():
     work_path = args.get("work")
     input_path = check_absolute_path(args.get("input"), work_path)
     output_path = check_absolute_path(args.get("output"), work_path)
-    headers_str: str = args.get("headers")
+    headers_str: str | None = args.get("headers")
+    headers_file: Path | None = args.get("headers_file")
     headers = None
     if headers_str:
         headers = headers_str.strip().split(",")
+    elif headers_file:
+        headers = headers_file.read_text().strip().split(",")
+
+    logger.debug(f"{headers=}")
+
+    if not headers or len(headers) < 2:
+        raise RuntimeError("headers is empty")
+
     csv_operation(input_path, output_path, headers)
 
 
