@@ -44,6 +44,7 @@ def combine_files(
     output_delimiter: str = ",",
     encoding="utf-8",
 ):
+    print("Running...")
     try:
         with output.open("w", newline="", encoding=encoding) as csvfile:
             writer = csv.writer(csvfile, delimiter=output_delimiter)
@@ -113,7 +114,7 @@ def proceed_files(
                 encoding=encoding,
             )
             futures.append(future)
-        print("Running..")
+        print("Running...")
         for future in tqdm(
             concurrent.futures.as_completed(futures), total=len(futures)
         ):
