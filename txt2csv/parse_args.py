@@ -62,15 +62,22 @@ def app_arg():
     ap.add_argument("--input", help="Path to input folder", required=True, type=Path)
     ap.add_argument(
         "--output",
-        help="Path for output file, default 'output.csv'",
-        default="output.csv",
+        help="Path for output files for folders or one file if defined filename as output, default 'output'",
+        default="output",
         type=Path,
     )
     ap.add_argument(
         "--headers",
-        help='The header for the csv file. To skip the header, specify an empty string "". '
-        'Default: "FILENAME,ID,NAME,FIELD1,FIELD2,FIELD3,FIELD4"',
-        default="FILENAME,ID,NAME,FIELD1,FIELD2,FIELD3,FIELD4",
+        help='The header for the csv file. To skip the header, specify an empty string "", '
+        'for example "FILENAME,ID,NAME,FIELD1,FIELD2,FIELD3,FIELD4". Default: ""',
+        default=None,
+    )
+    ap.add_argument(
+        "--headers_file",
+        help='The file with coma separated header for the csv file. To skip the header, specify an empty string "". '
+        'Default: ""',
+        type=Path,
+        default=None,
     )
     ap.add_argument(
         "--verbose",

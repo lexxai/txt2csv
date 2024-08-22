@@ -2,6 +2,8 @@ import logging
 import csv
 from pathlib import Path
 
+from tqdm import tqdm
+
 try:
     from txt2csv.parse_args import app_arg
 except ImportError:
