@@ -1,8 +1,12 @@
 import logging
 import csv
+import random
+import time
 from pathlib import Path
+import concurrent.futures
 
 from tqdm import tqdm
+from tqdm.contrib.logging import logging_redirect_tqdm
 
 try:
     from txt2csv.parse_args import app_arg
@@ -55,7 +59,7 @@ def combine_files(
     except Exception as e:
         logger.error(f"Output data error: '{e}'")
     else:
-        logger.info(f"Output data is saved to a file: '{output}'")
+        logger.debug(f"Output data is saved to a file: '{output}'")
 
 
 def proceed_file(
@@ -84,7 +88,7 @@ def proceed_file(
     except Exception as e:
         logger.error(f"proceed_file. Output data error: '{e}'")
     else:
-        logger.info(f"proceed_file. Output data is saved to a file: '{output_file}'")
+        logger.debug(f"proceed_file. Output data is saved to a file: '{output_file}'")
 
 
 def proceed_files(
@@ -95,15 +99,25 @@ def proceed_files(
     output_delimiter: str = ",",
     encoding="utf-8",
 ):
-    for txt_file in tqdm(input_data):
-        proceed_file(
-            txt_file=txt_file,
-            input_header=input_header,
-            output=output,
-            input_delimiter=input_delimiter,
-            output_delimiter=output_delimiter,
-            encoding=encoding,
-        )
+    max_workers = None
+    futures = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as pool:
+        for txt_file in input_data:
+            future = pool.submit(
+                proceed_file,
+                txt_file=txt_file,
+                input_header=input_header,
+                output=output,
+                input_delimiter=input_delimiter,
+                output_delimiter=output_delimiter,
+                encoding=encoding,
+            )
+            futures.append(future)
+        print("Running..")
+        for future in tqdm(
+            concurrent.futures.as_completed(futures), total=len(futures)
+        ):
+            future.result()
 
 
 def save_result_csv(
