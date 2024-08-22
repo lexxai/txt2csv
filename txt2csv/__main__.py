@@ -58,6 +58,54 @@ def combine_files(
         logger.info(f"Output data is saved to a file: '{output}'")
 
 
+def proceed_file(
+    txt_file: Path,
+    input_header: list[str],
+    output: Path,
+    input_delimiter: str = "\t",
+    output_delimiter: str = ",",
+    encoding="utf-8",
+):
+    output_file = output.joinpath(txt_file.stem).with_suffix(".csv")
+    output_file.parent.mkdir(parents=True, exist_ok=True)
+    try:
+        with output_file.open("w", newline="", encoding=encoding) as csvfile:
+            writer = csv.writer(csvfile, delimiter=output_delimiter)
+            if input_header:
+                writer.writerow(input_header)
+            with txt_file.open(encoding=encoding) as f:
+                reader = csv.reader(f, delimiter=input_delimiter)
+                for row in reader:
+                    writer.writerow(row)
+    except OSError as e:
+        logger.error(
+            f"proceed_file. Output data is not saved to a file: '{output_file}', error: {e}"
+        )
+    except Exception as e:
+        logger.error(f"proceed_file. Output data error: '{e}'")
+    else:
+        logger.info(f"proceed_file. Output data is saved to a file: '{output_file}'")
+
+
+def proceed_files(
+    input_header: list[str],
+    input_data: list[Path],
+    output: Path,
+    input_delimiter: str = "\t",
+    output_delimiter: str = ",",
+    encoding="utf-8",
+):
+    for txt_file in tqdm(input_data):
+        proceed_file(
+            txt_file=txt_file,
+            input_header=input_header,
+            output=output,
+            input_delimiter=input_delimiter,
+            output_delimiter=output_delimiter,
+            encoding=encoding,
+        )
+
+
 def save_result_csv(
     input_header: list[str],
     input_data: list[Path],
@@ -72,6 +120,15 @@ def save_result_csv(
 
     if not output.is_dir():
         combine_files(
+            input_header=input_header,
+            input_data=input_data,
+            output=output,
+            input_delimiter=input_delimiter,
+            output_delimiter=output_delimiter,
+            encoding=encoding,
+        )
+    else:
+        proceed_files(
             input_header=input_header,
             input_data=input_data,
             output=output,
