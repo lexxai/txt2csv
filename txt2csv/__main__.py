@@ -83,10 +83,10 @@ def main():
     )
     logger = logging.getLogger(__name__)
     work_path = args.get("work")
-    input_path = check_absolute_path(args.get("input"), work_path)
-    output_path = check_absolute_path(args.get("output"), work_path)
+    input_path: Path = check_absolute_path(args.get("input"), work_path)
+    output_path: Path = check_absolute_path(args.get("output"), work_path)
     headers_str: str | None = args.get("headers")
-    headers_file: Path | None = args.get("headers_file")
+    headers_file: Path | None = check_absolute_path(args.get("headers_file"), work_path)
     headers = None
     if headers_str:
         headers = headers_str.strip().split(",")
@@ -98,7 +98,10 @@ def main():
     if not headers or len(headers) < 2:
         raise RuntimeError("headers is empty")
 
-    csv_operation(input_path, output_path, headers)
+    if not output_path.exists() and output_path.suffix is "":
+        output_path.mkdir(parents=True, exist_ok=True)
+
+    # csv_operation(input_path, output_path, headers)
 
 
 if __name__ == "__main__":
