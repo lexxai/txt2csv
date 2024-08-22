@@ -80,6 +80,16 @@ def app_arg():
         default=None,
     )
     ap.add_argument(
+        "--input_delim",
+        help='Input filed delimiter. Default: "\\t"',
+        default="\t",
+    )
+    ap.add_argument(
+        "--output_delim",
+        help='Output filed delimiter. Default: ","',
+        default=",",
+    )
+    ap.add_argument(
         "--verbose",
         help="verbose output",
         action="store_true",

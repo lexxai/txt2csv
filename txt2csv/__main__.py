@@ -12,60 +12,96 @@ except ImportError:
 logger: logging
 
 
-def get_folder_data(input_folder: Path) -> dict[str, list[str]]:
-    result = {}
+def get_folder_data(input_folder: Path) -> list[Path]:
+    result = []
     if input_folder.is_dir():
         # result = [item.stem for item in input_folder.glob("*.*")]
-        for input_file in input_folder.glob("*.*"):
+        for input_file in sorted(input_folder.glob("*.*")):
             if input_file.is_file():
-                input_file_stem = input_file.stem
-                result[input_file_stem] = []
-                with input_file.open("r", encoding="utf-8") as fp:
-                    while True:
-                        line = fp.readline()
-                        if not line:
-                            break
-                        input_file_row = line.strip()
-                        if input_file_row:
-                            result[input_file_stem].append(input_file_row)
+                result.append(input_file)
+                # input_file_stem = input_file.stem
+                # result[input_file_stem] = []
+                # with input_file.open("r", encoding="utf-8") as fp:
+                #     while True:
+                #         line = fp.readline()
+                #         if not line:
+                #             break
+                #         input_file_row = line.strip()
+                #         if input_file_row:
+                #             result[input_file_stem].append(input_file_row)
     return result
+
+
+def combine_files(
+    input_header: list[str],
+    input_data: list[Path],
+    output: Path,
+    input_delimiter: str = "\t",
+    output_delimiter: str = ",",
+    encoding="utf-8",
+):
+    try:
+        with output.open("w", newline="", encoding=encoding) as csvfile:
+            writer = csv.writer(csvfile, delimiter=output_delimiter)
+            if input_header:
+                writer.writerow(input_header)
+            for txt_file in tqdm(input_data):
+                with txt_file.open(encoding=encoding) as f:
+                    reader = csv.reader(f, delimiter=input_delimiter)
+                    for row in reader:
+                        writer.writerow(row)
+    except OSError as e:
+        logger.error(f"Output data is not saved to a file: '{output}', error: {e}")
+    except Exception as e:
+        logger.error(f"Output data error: '{e}'")
+    else:
+        logger.info(f"Output data is saved to a file: '{output}'")
 
 
 def save_result_csv(
     input_header: list[str],
-    input_data: dict[str, list[str]],
+    input_data: list[Path],
     output: Path,
-    delimiter=",",
+    input_delimiter: str = "\t",
+    output_delimiter: str = ",",
     encoding="utf-8",
 ):
     if not input_data:
         logger.error("Nothing to save to csv file")
         return
 
-    try:
-        with output.open("w", newline="", encoding=encoding) as csvfile:
-            writer = csv.writer(csvfile, delimiter=delimiter)
-            if input_header:
-                writer.writerow(input_header)
-            for key in input_data.keys():
-                row: list = [key]
-                row.extend(input_data[key])
-                writer.writerow(row)
-    except OSError as e:
-        logger.error(f"Output data is not saved to a file: '{output}', error: {e}")
-    else:
-        logger.info(f"Output data is saved to a file: '{output}'")
+    if not output.is_dir():
+        combine_files(
+            input_header=input_header,
+            input_data=input_data,
+            output=output,
+            input_delimiter=input_delimiter,
+            output_delimiter=output_delimiter,
+            encoding=encoding,
+        )
 
 
-def csv_operation(input_path: Path, output: Path, input_header: list[str] = None):
-    input_data: dict[str, list[str]] = get_folder_data(input_path)
+def csv_operation(
+    input_path: Path,
+    output: Path,
+    input_header: list[str] = None,
+    input_delimiter: str = "\t",
+    output_delimiter: str = ",",
+):
+    input_data: list[Path] = get_folder_data(input_path)
     # prepare report statistic data
     input_records = len(input_data)
     report_txt = f"{input_records=}"
     logger.info(report_txt)
     # save result to csv file
     if input_data:
-        save_result_csv(input_header, input_data, output)
+        save_result_csv(
+            input_header=input_header,
+            input_data=input_data,
+            output=output,
+            input_delimiter=input_delimiter,
+            output_delimiter=output_delimiter,
+        )
     else:
         logger.error("No output data. Nothing to save.")
 
@@ -102,7 +138,13 @@ def main():
     if not output_path.exists() and output_path.suffix == "":
         output_path.mkdir(parents=True, exist_ok=True)
 
-    # csv_operation(input_path, output_path, headers)
+    csv_operation(
+        input_header=headers,
+        input_path=input_path,
+        output=output_path,
+        input_delimiter=args.get("input_delim"),
+        output_delimiter=args.get("output_delim"),
+    )
 
 
 if __name__ == "__main__":
