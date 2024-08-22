@@ -70,8 +70,9 @@ def csv_operation(input_path: Path, output: Path, input_header: list[str] = None
         logger.error("No output data. Nothing to save.")
 
 
-def check_absolute_path(p: Path, work: Path) -> Path:
-    return p if p.is_absolute() else work.joinpath(p)
+def check_absolute_path(p: Path, work: Path) -> Path | None:
+    if p:
+        return p if p.is_absolute() else work.joinpath(p)
 
 
 def main():
@@ -98,7 +99,7 @@ def main():
     if not headers or len(headers) < 2:
         raise RuntimeError("headers is empty")
 
-    if not output_path.exists() and output_path.suffix is "":
+    if not output_path.exists() and output_path.suffix == "":
         output_path.mkdir(parents=True, exist_ok=True)
 
     # csv_operation(input_path, output_path, headers)
@@ -108,4 +109,4 @@ if __name__ == "__main__":
     try:
         main()
     except Exception as err:
-        print(err)
+        print("Error: ", err)
