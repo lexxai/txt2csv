@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "txt2csv"
-version = "0.2.0"
+version = "0.2.1"
 description = ""
 authors = ["lexxai <lexxai@gmail.com>"]
 readme = "README.md"
@@ -19,3 +19,7 @@ pyinstaller = {version = "^5.13.2", python = ">=3.11,<3.13"}
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.scripts]
+txt2csv = "txt2csv.__main__:main"
